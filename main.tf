@@ -11,10 +11,13 @@ data "aws_vpc" "default" {
   default = true
 }
 
+resource "random_pet" "this" {}
+
 module "security_group" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name = "prep"
+  name = "prep-${random_pet.this.id}"
+
   description = "All traffic"
   vpc_id = data.aws_vpc.default.id
 
