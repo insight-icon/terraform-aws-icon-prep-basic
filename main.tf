@@ -9,12 +9,13 @@ module "user_data" {
   consul_enabled = var.consul_enabled
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
 
 resource "random_pet" "this" {}
 
+//data "aws_vpc" "default" {
+//  default = true
+//}
+//
 //module "vpc" {
 //  source = "terraform-aws-modules/vpc/aws"
 //
@@ -133,12 +134,24 @@ module "ansible_configuration" {
   }
 }
 
+resource "null_resource" "dependency_hack" {
+  triggers = {
+    apply_time = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+echo ${module.ansible_configuration.status}
+EOT
+  }
+}
 
 resource "aws_eip_association" "main" {
   instance_id = module.ec2.instance_id
   allocation_id = var.eip_id
-}
 
+  depends_on = [null_resource.dependency_hack]
+}
 
 resource "null_resource" "start_app" {
   triggers = {
@@ -148,6 +161,7 @@ resource "null_resource" "start_app" {
   provisioner "local-exec" {
     command = <<-EOT
 ssh -i ${var.private_key_path} ${var.ssh_user}@${var.main_ip} docker-compose -f /home/${var.ssh_user}/docker-compose.yml up -d
+echo ${module.ansible_configuration.status}
 EOT
   }
   depends_on = [aws_eip_association.main]
