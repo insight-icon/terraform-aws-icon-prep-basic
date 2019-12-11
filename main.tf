@@ -31,13 +31,13 @@ module "security_group" {
     from_port = 9000
     to_port = 9000
     protocol = "tcp"
-    description = "Security group json rpc traffic"
+    description = "json rpc traffic"
     cidr_blocks = "0.0.0.0/0"
   },{
-    from_port = 9000
-    to_port = 9000
+    from_port = 22
+    to_port = 22
     protocol = "tcp"
-    description = "Security group json rpc traffic"
+    description = "ssh traffic"
     cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
   }]
 }
