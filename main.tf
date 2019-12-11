@@ -43,7 +43,7 @@ module "security_group" {
 }
 
 module "ec2" {
-  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic"
+  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=conditional-create"
 
   name = var.name
 
