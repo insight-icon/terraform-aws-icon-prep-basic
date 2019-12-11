@@ -102,7 +102,7 @@ resource "null_resource" "start_app" {
 
   provisioner "local-exec" {
     command = <<-EOT
-ssh -i ${var.private_key_path} ${var.ssh_user}@${var.main_ip} docker-compose -f /home/${var.ssh_user}/docker-compose.yml up -d
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${var.private_key_path} ${var.ssh_user}@${var.main_ip} docker-compose -f /home/${var.ssh_user}/docker-compose.yml up -d
 echo ${module.ansible_configuration.status}
 EOT
   }
