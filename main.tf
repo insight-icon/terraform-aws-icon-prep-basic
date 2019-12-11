@@ -60,7 +60,7 @@ module "ec2" {
   user_data = var.user_data
 
   local_public_key = var.public_key_path
-  security_groups = var.security_groups
+  security_groups = var.security_groups == [] ? [module.security_group.this_security_group_id] : var.security_groups
 
   tags = var.tags
 }
