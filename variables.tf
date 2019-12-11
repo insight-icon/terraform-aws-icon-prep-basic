@@ -77,6 +77,11 @@ variable "security_groups" {
   default = []
 }
 
+variable "vpc_security_group_ids" {
+  type = list(string)
+  default = []
+}
+
 variable "corporate_ip" {
   type = string
   default = ""

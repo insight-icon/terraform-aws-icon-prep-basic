@@ -13,6 +13,10 @@ data "aws_vpc" "default" {
   default = true
 }
 
+data "aws_security_group" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
+
 resource "random_pet" "this" {}
 
 //module "vpc" {
@@ -36,7 +40,6 @@ resource "random_pet" "this" {}
 //    NetworkName = "icon"
 //  }
 //}
-//
 //
 //module "security_group" {
 //  source = "terraform-aws-modules/security-group/aws"
@@ -87,9 +90,27 @@ module "ec2" {
   user_data = var.user_data
 
   local_public_key = var.public_key_path
-//  security_groups = var.security_groups == [] ? [module.security_group.this_security_group_id] : var.security_groups
+  vpc_security_group_ids = var.vpc_security_group_ids
 
-  security_groups = var.security_groups
+  ingress_with_cidr_blocks = [{
+    from_port = 7100
+    to_port = 7100
+    protocol = "tcp"
+    description = "grpc traffic for when node starts producing blocks"
+    cidr_blocks = "0.0.0.0/0"
+  },{
+    from_port = 9000
+    to_port = 9000
+    protocol = "tcp"
+    description = "json rpc traffic"
+    cidr_blocks = "0.0.0.0/0"
+  },{
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    description = "ssh traffic"
+    cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
+  }]
 
   tags = var.tags
 }
