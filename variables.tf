@@ -106,7 +106,6 @@ variable "keystore_path" {
 
 variable "network_name" {
   type = string
-  default = "mainnet"
 }
 
 variable "main_ip" {

@@ -1,3 +1,5 @@
+data "aws_region" "this" {}
+
 module "user_data" {
   source = "github.com/insight-infrastructure/terraform-aws-icon-user-data"
 
@@ -13,34 +15,59 @@ data "aws_vpc" "default" {
 
 resource "random_pet" "this" {}
 
-module "security_group" {
-  source = "terraform-aws-modules/security-group/aws"
-
-  name = "prep-${random_pet.this.id}"
-
-  description = "All traffic"
-  vpc_id = data.aws_vpc.default.id
-
-  ingress_with_cidr_blocks = [{
-    from_port = 7100
-    to_port = 7100
-    protocol = "tcp"
-    description = "grpc traffic for when node starts producing blocks"
-    cidr_blocks = "0.0.0.0/0"
-  }, {
-    from_port = 9000
-    to_port = 9000
-    protocol = "tcp"
-    description = "json rpc traffic"
-    cidr_blocks = "0.0.0.0/0"
-  },{
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    description = "ssh traffic"
-    cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
-  }]
-}
+//module "vpc" {
+//  source = "terraform-aws-modules/vpc/aws"
+//
+//  create_vpc = var.subnet_id == "" ? true : false
+//
+//  name = "prep-vpc-${random_pet.this.id}"
+//  cidr = "10.0.0.0/16"
+//
+//  azs             = ["${data.aws_region.this.id}a"]
+//  private_subnets = ["10.0.0.0/24"]
+//  public_subnets  = ["10.0.101.0/24"]
+//
+//  enable_nat_gateway = false
+//  enable_vpn_gateway = false
+//
+//  tags = {
+//    Terraform = "true"
+//    Environment = "dev"
+//    NetworkName = "icon"
+//  }
+//}
+//
+//
+//module "security_group" {
+//  source = "terraform-aws-modules/security-group/aws"
+//  version = "~> 3.0"
+//
+//  create = var.security_groups == [] ? true : false
+//
+//  name = "prep-${random_pet.this.id}"
+//  description = "All traffic"
+//  vpc_id = data.aws_vpc.default.id
+//
+//  ingress_with_cidr_blocks = [{
+//    from_port = 7100
+//    to_port = 7100
+//    protocol = "tcp"
+//    description = "grpc traffic for when node starts producing blocks"
+//    cidr_blocks = "0.0.0.0/0"
+//  },{
+//    from_port = 9000
+//    to_port = 9000
+//    protocol = "tcp"
+//    description = "json rpc traffic"
+//    cidr_blocks = "0.0.0.0/0"
+//  },{
+//    from_port = 22
+//    to_port = 22
+//    protocol = "tcp"
+//    description = "ssh traffic"
+//    cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
+//  }]
+//}
 
 module "ec2" {
   source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=conditional-create"
@@ -60,7 +87,9 @@ module "ec2" {
   user_data = var.user_data
 
   local_public_key = var.public_key_path
-  security_groups = var.security_groups == [] ? [module.security_group.this_security_group_id] : var.security_groups
+//  security_groups = var.security_groups == [] ? [module.security_group.this_security_group_id] : var.security_groups
+
+  security_groups = var.security_groups
 
   tags = var.tags
 }
