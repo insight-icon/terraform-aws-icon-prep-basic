@@ -72,9 +72,15 @@ variable "private_key_path" {
   type = string
 }
 
-variable "security_groups" {
+//variable "security_groups" {
+//  type = list(string)
+//  default = []
+//}
+// ^^^ EVIL
+
+variable "vpc_security_group_ids" {
   type = list(string)
-  default = []
+  default = null  # For conditional logic to trickle down to module
 }
 
 variable "corporate_ip" {
@@ -106,7 +112,6 @@ variable "keystore_path" {
 
 variable "network_name" {
   type = string
-  default = "mainnet"
 }
 
 variable "main_ip" {

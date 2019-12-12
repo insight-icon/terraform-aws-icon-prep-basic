@@ -1,3 +1,5 @@
+data "aws_region" "this" {}
+
 module "user_data" {
   source = "github.com/insight-infrastructure/terraform-aws-icon-user-data"
 
@@ -7,43 +9,10 @@ module "user_data" {
   consul_enabled = var.consul_enabled
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
 resource "random_pet" "this" {}
 
-module "security_group" {
-  source = "terraform-aws-modules/security-group/aws"
-
-  name = "prep-${random_pet.this.id}"
-
-  description = "All traffic"
-  vpc_id = data.aws_vpc.default.id
-
-  ingress_with_cidr_blocks = [{
-    from_port = 7100
-    to_port = 7100
-    protocol = "tcp"
-    description = "grpc traffic for when node starts producing blocks"
-    cidr_blocks = "0.0.0.0/0"
-  }, {
-    from_port = 9000
-    to_port = 9000
-    protocol = "tcp"
-    description = "Security group json rpc traffic"
-    cidr_blocks = "0.0.0.0/0"
-  },{
-    from_port = 9000
-    to_port = 9000
-    protocol = "tcp"
-    description = "Security group json rpc traffic"
-    cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
-  }]
-}
-
 module "ec2" {
-  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic"
+  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=conditional-create"
 
   name = var.name
 
@@ -60,7 +29,27 @@ module "ec2" {
   user_data = var.user_data
 
   local_public_key = var.public_key_path
-  security_groups = var.security_groups
+  vpc_security_group_ids = var.vpc_security_group_ids
+
+  ingress_with_cidr_blocks = [{
+    from_port = 7100
+    to_port = 7100
+    protocol = "tcp"
+    description = "grpc traffic for when node starts producing blocks"
+    cidr_blocks = "0.0.0.0/0"
+  },{
+    from_port = 9000
+    to_port = 9000
+    protocol = "tcp"
+    description = "json rpc traffic"
+    cidr_blocks = "0.0.0.0/0"
+  },{
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    description = "ssh traffic"
+    cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
+  }]
 
   tags = var.tags
 }
@@ -87,12 +76,24 @@ module "ansible_configuration" {
   }
 }
 
+resource "null_resource" "dependency_hack" {
+  triggers = {
+    apply_time = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+echo ${module.ansible_configuration.status}
+EOT
+  }
+}
 
 resource "aws_eip_association" "main" {
   instance_id = module.ec2.instance_id
   allocation_id = var.eip_id
-}
 
+  depends_on = [null_resource.dependency_hack]
+}
 
 resource "null_resource" "start_app" {
   triggers = {
@@ -101,7 +102,8 @@ resource "null_resource" "start_app" {
 
   provisioner "local-exec" {
     command = <<-EOT
-ssh -i ${var.private_key_path} ${var.ssh_user}@${var.main_ip} docker-compose -f /home/${var.ssh_user}/docker-compose.yml up -d
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${var.private_key_path} ${var.ssh_user}@${var.main_ip} docker-compose -f /home/${var.ssh_user}/docker-compose.yml up -d
+echo ${module.ansible_configuration.status}
 EOT
   }
   depends_on = [aws_eip_association.main]
