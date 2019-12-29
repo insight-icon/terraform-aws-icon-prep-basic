@@ -12,7 +12,7 @@ module "user_data" {
 resource "random_pet" "this" {}
 
 module "ec2" {
-  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=conditional-create"
+  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=master"
 
   name = var.name
 
