@@ -1,4 +1,3 @@
-
 variable "node_type" {
   type = string
   default = "prep"
@@ -126,4 +125,22 @@ variable "eip_id" {
 variable "create_eip" {
   type = bool
   default = false
+}
+
+###########
+# Data Refs
+###########
+variable "vpc_tags" {
+  type = map(string)
+  default = {}
+}
+
+variable "eip_tags" {
+  type = map(string)
+  default = {}
+}
+
+variable "sg_tags" {
+  type = map(string)
+  default = {}
 }

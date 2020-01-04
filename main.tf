@@ -1,5 +1,39 @@
 data "aws_region" "this" {}
 
+data "aws_vpc" "this" {
+  count = var.vpc_tags == {} ? 0 : 1
+  dynamic "filter" {
+    for_each = var.vpc_tags
+    content {
+      name = "tag:${filter.key}"
+      values = [filter.value]
+    }
+  }
+}
+
+data "aws_eip" "this" {
+  count = var.eip_tags == {} ? 0 : 1
+
+  dynamic "filter" {
+    for_each = var.eip_tags
+    content {
+      name = "tag:${filter.key}"
+      values = [filter.value]
+    }
+  }
+}
+
+data "aws_security_group" "this" {
+  count = var.sg_tags == {} ? 0 : 1
+  dynamic "filter" {
+    for_each = var.sg_tags
+    content {
+      name = "tag:${filter.key}"
+      values = [filter.value]
+    }
+  }
+}
+
 module "user_data" {
   source = "github.com/insight-infrastructure/terraform-aws-icon-user-data"
 
@@ -31,7 +65,7 @@ module "ec2" {
   local_public_key = var.public_key_path
   vpc_security_group_ids = var.vpc_security_group_ids
 
-  ingress_with_cidr_blocks = [{
+  ingress_with_cidr_blocks = var.vpc_security_group_ids == null ? [{
     from_port = 7100
     to_port = 7100
     protocol = "tcp"
@@ -49,7 +83,7 @@ module "ec2" {
     protocol = "tcp"
     description = "ssh traffic"
     cidr_blocks = var.corporate_ip == "" ? "0.0.0.0/0" : var.corporate_ip
-  }]
+  }] : []
 
   tags = var.tags
 }
@@ -79,6 +113,7 @@ module "ansible_configuration" {
 resource "null_resource" "dependency_hack" {
   triggers = {
     apply_time = timestamp()
+//    instances = module.ansible_configuration.status
   }
 
   provisioner "local-exec" {
@@ -90,7 +125,7 @@ EOT
 
 resource "aws_eip_association" "main" {
   instance_id = module.ec2.instance_id
-  allocation_id = var.eip_id
+  allocation_id = var.eip_id == "" ? data.aws_eip.this.id  : var.eip_id
 
   depends_on = [null_resource.dependency_hack]
 }
