@@ -31,6 +31,7 @@ module "ec2" {
   local_public_key = var.public_key_path
   vpc_security_group_ids = var.vpc_security_group_ids
 
+//  This is ignored if vpc_security_group_ids are suplied
   ingress_with_cidr_blocks = [{
     from_port = 7100
     to_port = 7100
@@ -78,7 +79,9 @@ module "ansible_configuration" {
 
 resource "null_resource" "dependency_hack" {
   triggers = {
-    apply_time = timestamp()
+//    apply_time = timestamp()
+//    Change only when status changes
+    ansible_status = module.ansible_configuration.status
   }
 
   provisioner "local-exec" {
