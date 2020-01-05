@@ -56,7 +56,7 @@ module "ec2" {
 }
 
 module "ansible_configuration" {
-  source = "github.com/insight-infrastructure/terraform-aws-ansible-playbook.git?ref=fix-null-trigger"
+  source = "github.com/insight-infrastructure/terraform-aws-ansible-playbook.git?ref=v0.5.0"
 
   ip = module.ec2.public_ip
 
@@ -79,8 +79,6 @@ module "ansible_configuration" {
 
 resource "null_resource" "dependency_hack" {
   triggers = {
-//    apply_time = timestamp()
-//    Change only when status changes
     ansible_status = module.ansible_configuration.status
   }
 
