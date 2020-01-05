@@ -56,7 +56,7 @@ module "ec2" {
 }
 
 module "ansible_configuration" {
-  source = "github.com/insight-infrastructure/terraform-aws-ansible-playbook"
+  source = "github.com/insight-infrastructure/terraform-aws-ansible-playbook.git?ref=fix-null-trigger"
 
   ip = module.ec2.public_ip
 
