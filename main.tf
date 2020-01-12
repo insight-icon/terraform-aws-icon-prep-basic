@@ -12,7 +12,7 @@ module "user_data" {
 resource "random_pet" "this" {}
 
 module "ec2" {
-  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=master"
+  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=fix-az-order"
 
   name = var.name
 
