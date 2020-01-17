@@ -1,5 +1,19 @@
 data "aws_region" "this" {}
 
+locals {
+  main_playbook_vars = {
+    "public_ip": module.ec2.public_ip
+    "keystore_path" : var.keystore_path
+    "keystore_password": var.keystore_password
+    "network_name": var.network_name
+    "main_ip": var.main_ip
+    "instance_id": module.ec2.instance_id
+  }
+
+  playbook_vars = merge(local.main_playbook_vars, var.additional_playbook_vars)
+}
+
+
 module "user_data" {
   source = "github.com/insight-infrastructure/terraform-aws-icon-user-data"
 
@@ -67,14 +81,7 @@ module "ansible_configuration" {
   playbook_file_path = var.playbook_file_path
   roles_dir = var.roles_dir
 
-  playbook_vars = {
-    "public_ip": module.ec2.public_ip
-    "keystore_path" : var.keystore_path
-    "keystore_password": var.keystore_password
-    "network_name": var.network_name
-    "main_ip": var.main_ip
-    "instance_id": module.ec2.instance_id
-  }
+  playbook_vars = local.playbook_vars
 }
 
 resource "null_resource" "dependency_hack" {

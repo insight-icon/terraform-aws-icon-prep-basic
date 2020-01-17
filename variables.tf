@@ -127,3 +127,8 @@ variable "create_eip" {
   type = bool
   default = false
 }
+
+variable "additional_playbook_vars" {
+  type = map(string)
+  default = {}
+}
