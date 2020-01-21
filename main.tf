@@ -10,7 +10,7 @@ locals {
     "instance_id": module.ec2.instance_id
   }
 
-  playbook_vars = merge(local.main_playbook_vars, var.additional_playbook_vars)
+  playbook_vars = merge(local.main_playbook_vars, var.playbook_vars)
 }
 
 

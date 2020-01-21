@@ -102,6 +102,11 @@ variable "roles_dir" {
   default = "."
 }
 
+variable "playbook_vars" {
+  type = map(string)
+  default = {}
+}
+
 variable "keystore_password" {
   type = string
 }
@@ -126,9 +131,4 @@ variable "eip_id" {
 variable "create_eip" {
   type = bool
   default = false
-}
-
-variable "additional_playbook_vars" {
-  type = map(string)
-  default = {}
 }
