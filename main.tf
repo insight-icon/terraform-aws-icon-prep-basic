@@ -26,7 +26,7 @@ module "user_data" {
 resource "random_pet" "this" {}
 
 module "ec2" {
-  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=master"
+  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=v0.4.0"
 
   name = var.name
 
@@ -70,7 +70,7 @@ module "ec2" {
 }
 
 module "ansible_configuration" {
-  source = "github.com/insight-infrastructure/terraform-aws-ansible-playbook.git?ref=v0.5.0"
+  source = "github.com/insight-infrastructure/terraform-aws-ansible-playbook.git?ref=v0.6.0"
 
   ip = module.ec2.public_ip
 
