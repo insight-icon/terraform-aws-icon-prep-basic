@@ -15,7 +15,7 @@ locals {
 
 
 module "user_data" {
-  source = "github.com/insight-infrastructure/terraform-aws-icon-user-data"
+  source = "github.com/insight-infrastructure/terraform-aws-icon-user-data.git?ref=v0.2.0"
 
   type = var.node_type
   ssh_user = var.ssh_user
