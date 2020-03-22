@@ -2,3 +2,18 @@
 
 ansible
 .terraform
+
+terraform.tfvars
+
+# Terraform and terragrunt
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terragrunt-cache/
+.terraform/
+.terraform.tfstate.lock.info
+
+test/fixtures/keys/*
+!test/fixtures/keys/.gitkeep
+
+ansible/roles/icon-prep
