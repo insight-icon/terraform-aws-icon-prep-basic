@@ -26,7 +26,7 @@ module "user_data" {
 resource "random_pet" "this" {}
 
 module "ec2" {
-  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=v0.4.0"
+  source = "github.com/insight-infrastructure/terraform-aws-ec2-basic.git?ref=fix-to-join"
 
   name = var.name
 
